@@ -84,6 +84,12 @@
             </div>
             @endif
 
+            @if(session('error'))
+            <div style="color: red; text-align: center; margin-bottom: 20px;">
+                    {{ session('error') }}
+            </div>
+            @endif
+
             <div class="form-group">
                 <label for="first_name">First Name:</label>
                 <input type="text" name="first_name" id="first_name" required>
@@ -120,6 +126,12 @@
             </div>
                
             <button type="submit">Register</button>
+
+            <a href="/listing" style="text-decoration: none;">
+            <button type="button" style="margin-top: 10px; background-color: #28a745;">View Users</button>
+            </a>
+
         </form>
+
     </body>
 </html>

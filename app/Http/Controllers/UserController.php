@@ -52,7 +52,73 @@ class UserController extends Controller
             Log::error("Registration failed: " . $e->getMessage());
 
             // Return an error response to the user
-            return redirect()->back()->withErrors(['error' => 'Registration failed. Please try again.']);
+            return redirect()->back()->with('error', 'Registration failed:' . $e->getMessage());
+
         }
     }
+
+    // public function showUsers()
+    // {
+    //      // Fetch users from the database (replace with your logic)
+    //      $users = User::all(); // Assuming 'User' is your model
+    //      return view('listing', ['users' => $users]);
+    // }
+
+    public function showUsers(Request $request) {
+        $query = User::query();
+    
+        // Apply filters if search parameters are provided
+        if ($request->filled('name')) {
+            $query->where('first_name', 'like', '%' . $request->name . '%')
+                  ->orWhere('last_name', 'like', '%' . $request->name . '%');
+        }
+    
+        if ($request->filled('email')) {
+            $query->where('email', 'like', '%' . $request->email . '%');
+        }
+    
+        $users = $query->get();
+        return view('listing', compact('users'));
+    }
+
+    public function showUserDetails($id)
+    {
+        // Fetch the user by ID
+        $user = User::findOrFail($id); // Will throw a 404 if user not found
+        return view('user-details', compact('user'));
+    }
+
+    public function edit($id)
+    {
+        $user = User::findOrFail($id);
+        return view('edit-user', compact('user'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+    
+        $validatedData = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'gender' => 'required|in:male,female',
+            'email' => 'required|email|unique:users,email,' . $id,
+        ]);
+    
+        $user->update($validatedData);
+    
+        return redirect()->route('user-details', $user->id)->with('success', 'User updated successfully!');
+    }
+    
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+    
+        return redirect('/listing')->with('success', 'User deleted successfully!');
+    }
+        
+    
+    
+
 }
